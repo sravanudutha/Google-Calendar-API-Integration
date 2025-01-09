@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Calendar Access</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <h1>Google Calendar Events</h1>
+
+    <!-- Google Login Button -->
+    <div id="gSignIn"></div>
+
+    <h2>Upcoming Events:</h2>
+    <ul id="events-list"></ul>
+
+    <script>
+        let clientId = 'YOUR_CLIENT_ID.apps.googleusercontent.com'; // Replace with your own client ID
+        let apiKey = 'YOUR_API_KEY'; // Replace with your own API Key
+        let calendarId = 'primary'; // Access your primary calendar, or specify another calendar
+
+        let SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+
+        // Load the API client and auth2 library
+        function loadClient() {
+            gapi.client.setApiKey(apiKey);
+            return gapi.client.load("https://content.googleapis.com/discovery/v1/apis/calendar/v3/rest")
+                .then(function() {
+                    console.log("GAPI client loaded for API");
+                }, function(error) {
+                    console.error("Error loading GAPI client for API", error);
+                });
+        }
+
+        // Sign in and get events
+        function handleAuthClick() {
+            gapi.auth2.getAuthInstance().signIn().then(function() {
+                console.log("Sign-in successful");
+                listUpcomingEvents();
+            });
+        }
+
+        // List upcoming events
+        function listUpcomingEvents() {
+            gapi.client.calendar.events.list({
+                "calendarId": calendarId,
+                "timeMin": (new Date()).toISOString(),
+                "showDeleted": false,
+                "singleEvents": true,
+                "maxResults": 10,
+                "orderBy": "startTime"
+            }).then(function(response) {
+                let events = response.result.items;
+                let eventsList = document.getElementById("events-list");
+                eventsList.innerHTML = '';
+
+                if (events.length > 0) {
+                    for (let i = 0; i < events.length; i++) {
+                        let event = events[i];
+                        let li = document.createElement("li");
+                        li.textContent = event.summary + " (" + event.start.dateTime + ")";
+                        eventsList.appendChild(li);
+                    }
+                } else {
+                    eventsList.innerHTML = "No upcoming events found.";
+                }
+            });
+        }
+
+        // Load the Google API client and check if the user is signed in
+        function init() {
+            gapi.load("client:auth2", function() {
+                gapi.auth2.init({
+                    client_id: clientId,
+                    scope: SCOPES
+                }).then(function() {
+                    // Check if user is already signed in
+                    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+                        listUpcomingEvents();
+                    } else {
+                        // If not signed in, show sign-in button
+                        let signInButton = document.getElementById('gSignIn');
+                        signInButton.innerHTML = `<button onclick="handleAuthClick()">Sign in with Google</button>`;
+                    }
+                });
+            });
+        }
+
+        // Initialize the client on page load
+        window.onload = init;
+    </script>
+</body>
+</html>
