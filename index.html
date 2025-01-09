@@ -17,15 +17,14 @@
     <ul id="events-list"></ul>
 
     <script>
-        let clientId = 'YOUR_CLIENT_ID.apps.googleusercontent.com'; // Replace with your own client ID
-        let apiKey = 'YOUR_API_KEY'; // Replace with your own API Key
+        // Your Google API Client ID
+        let clientId = '65313626720-7atnaubnk25l56f1sgts32k9i25u9t7s.apps.googleusercontent.com'; // Replace with your actual Client ID
         let calendarId = 'primary'; // Access your primary calendar, or specify another calendar
-
         let SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
 
         // Load the API client and auth2 library
         function loadClient() {
-            gapi.client.setApiKey(apiKey);
+            gapi.client.setApiKey('YOUR_API_KEY');  // Optional, for other API calls
             return gapi.client.load("https://content.googleapis.com/discovery/v1/apis/calendar/v3/rest")
                 .then(function() {
                     console.log("GAPI client loaded for API");
